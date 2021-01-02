@@ -1,0 +1,1 @@
+SELECT remove_continuous_aggregate_policy('conditions_summary_minutely');

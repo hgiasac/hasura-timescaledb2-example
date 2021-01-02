@@ -1,0 +1,34 @@
+version: '3.6'
+services:
+  timescaledb:
+    image: timescale/timescaledb:2.0.0-pg12
+    restart: always
+    volumes:
+    - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+
+  graphql-engine:
+    image: graphql-engine
+    build: ./data
+    ports:
+    - "8080:8080"
+    # volumes:
+    # - ./data/migrations:/hasura-migrations
+    # - ./data/metadata:/hasura-metadata
+    depends_on:
+    - "timescaledb"
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@timescaledb:5432/postgres?sslmode=disable
+      ## enable the console served by server
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+      ## enable debugging mode. It is recommended to disable this in production
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup,http-log,webhook-log,websocket-log,query-log
+      ## uncomment next line to set an admin secret
+      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+      HASURA_GRAPHQL_MIGRATIONS_DISABLE_TRANSACTION: "true"
+
+volumes:
+  db_data:

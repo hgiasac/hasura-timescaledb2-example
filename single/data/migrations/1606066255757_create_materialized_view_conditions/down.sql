@@ -1,0 +1,1 @@
+DROP MATERIALIZED VIEW conditions_summary_minutely;

@@ -1,0 +1,6 @@
+- table:
+    schema: public
+    name: conditions
+- table:
+    schema: public
+    name: conditions_summary_minutely

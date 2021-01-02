@@ -1,0 +1,21 @@
+- table:
+    schema: public
+    name: conditions
+  object_relationships:
+  - name: location_info
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: locations
+        column_mapping:
+          location: id
+- table:
+    schema: public
+    name: conditions_summary_hourly
+- table:
+    schema: public
+    name: local_conditions
+- table:
+    schema: public
+    name: locations

@@ -1,0 +1,84 @@
+version: '3.6'
+services:
+  timescaledb:
+    image: timescale/timescaledb:2.0.0-pg12
+    restart: always
+    command:
+      - "-cenable_partitionwise_aggregate=on"
+      - "-cjit=off"
+    volumes:
+    - db_data:/var/lib/postgresql/data
+    - ./scripts/add-data-nodes.sh:/docker-entrypoint-initdb.d/add-data-nodes.sh
+    networks:
+    - default
+    - timescaledb
+    depends_on:
+    - "timescaledb-data1"
+    - "timescaledb-data2"
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+      TIMESCALE_DATA_NODES: timescaledb-data1,timescaledb-data2
+
+
+  timescaledb-data1:
+    image: timescale/timescaledb:2.0.0-pg12
+    restart: always
+    command:
+      - "-cmax_prepared_transactions=150"
+    volumes:
+    - db_data1:/var/lib/postgresql/data
+    # - ./scripts/configure-data-node.sh:/docker-entrypoint-initdb.d/configure-data-node.sh
+    networks:
+    - timescaledb
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  timescaledb-data2:
+    image: timescale/timescaledb:2.0.0-pg12
+    restart: always
+    command:
+      - "-cmax_prepared_transactions=150"
+    volumes:
+    - db_data2:/var/lib/postgresql/data
+    # - ./scripts/configure-data-node.sh:/docker-entrypoint-initdb.d/configure-data-node.sh
+    networks:
+    - timescaledb
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  graphql-engine:
+    image: graphql-engine
+    build: ./data
+    ports:
+    - "8080:8080"
+    volumes:
+    - ./data/migrations:/hasura-migrations
+    - ./data/metadata:/hasura-metadata
+    restart: always
+    depends_on:
+    - "timescaledb"
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@timescaledb:5432/postgres?sslmode=disable
+      ## enable the console served by server
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+      ## enable debugging mode. It is recommended to disable this in production
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup,http-log,webhook-log,websocket-log,query-log
+      ## uncomment next line to set an admin secret
+      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+      HASURA_GRAPHQL_MIGRATIONS_DISABLE_TRANSACTION: "true"
+
+volumes:
+  db_data:
+  db_data1:
+  db_data2:
+
+networks:
+  timescaledb:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.16.240.0/24
