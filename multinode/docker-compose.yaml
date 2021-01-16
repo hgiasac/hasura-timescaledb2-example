@@ -49,8 +49,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
 
   graphql-engine:
-    image: graphql-engine
-    build: ./data
+    image: hasura/graphql-engine:v1.3.3.cli-migrations-v2
     ports:
     - "8080:8080"
     volumes:

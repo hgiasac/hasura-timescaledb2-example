@@ -13,9 +13,9 @@ services:
     build: ./data
     ports:
     - "8080:8080"
-    # volumes:
-    # - ./data/migrations:/hasura-migrations
-    # - ./data/metadata:/hasura-metadata
+    volumes:
+    - ./data/migrations:/hasura-migrations
+    - ./data/metadata:/hasura-metadata
     depends_on:
     - "timescaledb"
     restart: always

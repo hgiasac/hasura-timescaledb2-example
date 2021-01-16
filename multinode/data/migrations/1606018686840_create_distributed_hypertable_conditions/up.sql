@@ -16,7 +16,7 @@ CREATE TABLE conditions (
   humidity    DOUBLE PRECISION  NULL
 );
 
-SELECT create_distributed_hypertable('conditions', 'time', replication_factor => 2);
+SELECT create_distributed_hypertable('conditions', 'time');
 
 CREATE OR REPLACE FUNCTION "public"."conditions_set_default_location"()
   RETURNS TRIGGER AS $$
